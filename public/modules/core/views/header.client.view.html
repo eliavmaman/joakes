@@ -1,28 +1,61 @@
+<!--<div class="navbar-inner">-->
+	<!--<div class="container">-->
+		<!--<a href="#" class="brand"></a>-->
+		<!--<ul class="nav pull-right">-->
+			<!--<li><a ui-sref="signup" class="apply-link">Apply to be a babysitter!</a></li>-->
+			<!--<li class="dropdown">-->
+				<!--<a class="dropdown-toggle" data-toggle="dropdown">-->
+					<!--<img class="portrait img-rounded" src="img/selfportrait.png">-->
+					<!--Jeff Lam Tian Hung-->
+					<!--<b class="caret"></b>-->
+				<!--</a>-->
+				<!--<ul class="dropdown-menu">-->
+					<!--<li><a href="index.html#/feed">News Feed</a></li>-->
+					<!--<li><a href="#">Messages</a></li>-->
+					<!--<li><a href="#">Bookmarks</a></li>-->
+					<!--<li><a href="#">Appointments</a></li>-->
+					<!--<li class="divider"></li>-->
+					<!--<li><a href="#">Logout</a></li>-->
+				<!--</ul>-->
+			<!--</li>-->
+		<!--</ul>-->
+	<!--</div>-->
+<!--</div>-->
+<!--<div class="header-background">-->
+	<!--<div class="container">-->
+		<!--<div class="testimonial">-->
+			<!--"Finding the right babysitter has never been easier."-->
+			<!--<br>-->
+			<!--<span class="name">Michelle Obama</span>-->
+		<!--</div>-->
+	<!--</div>-->
+<!--</div>-->
 <div class="container" data-ng-controller="HeaderController">
-	<div class="navbar-header">
+	<div class="navbar-header pull-left" >
+
 		<button class="navbar-toggle" type="button" data-ng-click="toggleCollapsibleMenu()">
 			<span class="sr-only">Toggle navigation</span>
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
 			<span class="icon-bar"></span>
 		</button>
-		<a href="/#!/" class="navbar-brand">joeks</a>
+		<a href="/#!/" class="navbar-brand ">Blove</a>
 	</div>
 	<nav class="collapse navbar-collapse" collapse="!isCollapsed" role="navigation">
-		<ul class="nav navbar-nav" data-ng-if="menu.shouldRender(authentication.user);">
-			<li data-ng-repeat="item in menu.items | orderBy: 'position'" data-ng-if="item.shouldRender(authentication.user);" ng-switch="item.menuItemType" ui-route="{{item.uiRoute}}" class="{{item.menuItemClass}}" ng-class="{active: ($uiRoute)}" dropdown="item.menuItemType === 'dropdown'">
-				<a ng-switch-when="dropdown" class="dropdown-toggle">
-					<span data-ng-bind="item.title"></span>
-					<b class="caret"></b>
-				</a>
-				<ul ng-switch-when="dropdown" class="dropdown-menu">
-					<li data-ng-repeat="subitem in item.items | orderBy: 'position'" data-ng-if="subitem.shouldRender(authentication.user);" ui-route="{{subitem.uiRoute}}" ng-class="{active: $uiRoute}">
-						<a href="/#!/{{subitem.link}}" data-ng-bind="subitem.title"></a>
-					</li>
-				</ul>
-				<a ng-switch-default href="/#!/{{item.link}}" data-ng-bind="item.title"></a>
-			</li>
-		</ul>
+		<!--<ul class="nav navbar-nav" data-ng-if="menu.shouldRender(authentication.user);">-->
+			<!--<li data-ng-repeat="item in menu.items | orderBy: 'position'" data-ng-if="item.shouldRender(authentication.user);" ng-switch="item.menuItemType" ui-route="{{item.uiRoute}}" class="{{item.menuItemClass}}" ng-class="{active: ($uiRoute)}" dropdown="item.menuItemType === 'dropdown'">-->
+				<!--<a ng-switch-when="dropdown" class="dropdown-toggle">-->
+					<!--<span data-ng-bind="item.title"></span>-->
+					<!--<b class="caret"></b>-->
+				<!--</a>-->
+				<!--<ul ng-switch-when="dropdown" class="dropdown-menu">-->
+					<!--<li data-ng-repeat="subitem in item.items | orderBy: 'position'" data-ng-if="subitem.shouldRender(authentication.user);" ui-route="{{subitem.uiRoute}}" ng-class="{active: $uiRoute}">-->
+						<!--<a href="/#!/{{subitem.link}}" data-ng-bind="subitem.title"></a>-->
+					<!--</li>-->
+				<!--</ul>-->
+				<!--<a ng-switch-default href="/#!/{{item.link}}" data-ng-bind="item.title"></a>-->
+			<!--</li>-->
+		<!--</ul>-->
 		<ul class="nav navbar-nav navbar-right" data-ng-hide="authentication.user">
 			<li ui-route="/signup" ng-class="{active: $uiRoute}">
 				<a href="/#!/signup">Sign Up</a>
@@ -33,13 +66,16 @@
 			</li>
 		</ul>
 		<ul class="nav navbar-nav navbar-right" data-ng-show="authentication.user">
+			<li><img src="{{authentication.user.image}}" class="thumbnail" style="width:40px;height: 40px;margin-bottom: 0;margin-top:5px; "/></li>
 			<li class="dropdown">
 				<a href="#" class="dropdown-toggle" data-toggle="dropdown">
 					<span data-ng-bind="authentication.user.displayName"></span> <b class="caret"></b>
 				</a>
 				<ul class="dropdown-menu">
 					<li>
-						<a href="/#!/settings/profile">Edit Profile</a>
+						<a ui-sref="myMessages">הודעות</a>
+					<li>
+						<a ui-sref="profile">הפרופיל שלי</a>
 					</li>
 					<li>
 						<a href="/#!/settings/accounts">Manage Social Accounts</a>
@@ -55,4 +91,13 @@
 			</li>
 		</ul>
 	</nav>
+</div>
+<div class="header-background">
+	<div class="container">
+		<div class="testimonial">
+			"תנו לילדיכם כנפיים שיוכלו לעוף הכי גבוה שאפשר, ותנו להם שורשים חזקים ועמוקים שיהיה להם תמיד לאן לחזור."
+			<br>
+			<span class="name">חוכמה ברזילאית</span>
+		</div>
+	</div>
 </div>

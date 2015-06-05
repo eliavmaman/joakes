@@ -11,7 +11,8 @@ var ApplicationConfiguration = function () {
         'ngSanitize',
         'ui.router',
         'ui.bootstrap',
-        'ui.utils'
+        'ui.utils',
+        'ngS3upload'
       ];
     // Add a new vertical module
     var registerModule = function (moduleName, dependencies) {
@@ -171,11 +172,342 @@ angular.module('core').controller('HeaderController', [
 angular.module('core').controller('HomeController', [
   '$scope',
   'Authentication',
-  function ($scope, Authentication) {
+  '$http',
+  'Notifications',
+  function ($scope, Authentication, $http, Notifications) {
     // This provides Authentication context.
     $scope.authentication = Authentication;
+    $scope.pay = function () {
+      $http.get('/paypal').then(function (res) {
+        console.log(res);
+      });
+    };
+    $scope.init = function () {
+      $http.get('/users').success(function (result) {
+        $scope.babysitters = result;
+      });
+    };
+    $scope.scrollWindow = function () {
+      jQuery('body').animate({ scrollTop: 515 }, 500);
+      // Bad code to use jquery, but for animation sake!
+      jQuery('.listing-container').animate({ opacity: 1 }, 500);
+      jQuery('.baby-cta').animate({ opacity: 0 }, 500);
+    };
+    $scope.popover = {
+      'content': 'Nanny sharing available! Click to inquire.',
+      'saved': false
+    };
+    $scope.displayDetailTab = function (tab) {
+      console.log('yo ' + tab);
+    };
+    $scope.message = {
+      name: '',
+      email: '',
+      message: ''
+    };
+    $scope.newComment = '';
+    $scope.sendMessage = function (user) {
+      $http.post('/usermessages/' + user._id, $scope.message).then(onPostCompletd, onPostFailed);
+    };
+    function onPostCompletd(res) {
+      Notifications.success('\u05d4\u05d4\u05d5\u05d3\u05e2\u05d4 \u05e0\u05e9\u05dc\u05d7\u05d4 \u05d1\u05d4\u05e6\u05dc\u05d7\u05d4');  //$modalInstance.close($scope.message);
+    }
+    function onPostFailed(res) {
+      Notifications.error('\u05d0\u05d9\u05e8\u05e2\u05d4 \u05e9\u05d2\u05d9\u05d0\u05d4, \u05d0\u05e0\u05d0 \u05e0\u05e1\u05d4 \u05e9\u05e0\u05d9\u05ea');
+    }
+    $scope.addUserComment = function (user) {
+      $http.post('/userreviews/' + user._id, $scope.newComment).then(function (savedComment) {
+        user.comments.push(savedComment);
+      });
+    };  //$scope.babysitters = [
+        //  {
+        //    firstName: 'Teresa',
+        //    lastName: 'Aldrige - $45/hour',
+        //    description: 'Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.',
+        //    portrait: 'img/babysitter-portrait.png',
+        //    location: 'Palo Alto, CA'
+        //  },
+        //  {
+        //    firstName: 'Ana',
+        //    lastName: 'Navarro - $55/hour',
+        //    description: 'Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.',
+        //    portrait: 'img/babysitter-portrait2.png',
+        //    location: 'Stanford, CA'
+        //  },
+        //  {
+        //    firstName: 'Fei',
+        //    lastName: 'Fei  - $45/hour',
+        //    description: 'Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.',
+        //    portrait: 'img/babysitter-portrait3.png',
+        //    location: 'Mountain View, CA'
+        //  },
+        //  {
+        //    firstName: 'Melissa',
+        //    lastName: 'Miranda - $50/hour',
+        //    description: 'Curabitur blandit tempus porttitor. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Aenean eu leo quam. Pellentesque ornare sem lacinia quam venenatis vestibulum.',
+        //    portrait: 'img/babysitter-portrait4.png',
+        //    location: 'Sunnyvale, CA'
+        //  }
+        //];
   }
-]);'use strict';
+]);
+angular.module('core').directive('reviewsBtn', function () {
+  return {
+    scope: true,
+    link: function (scope, element, attrs) {
+      element.on('click', function () {
+        $(element).closest('.search-listing').find('.detailsBox').hide();
+        var parentListingView = $(element).closest('.search-listing').find('.listing-detail-container').removeClass('hide');
+        if ($(parentListingView).find('.reviews').is(':visible')) {
+          $(parentListingView).find('.reviews').hide();
+        } else {
+          $(parentListingView).find('.reviews').show();
+        }  //var parentListingView = $(element).closest('.search-listing');//.parent().parent().parent();
+           //if (parentListingView.css('height') === '220px') {
+           //  //if (true) {
+           //  parentListingView.css('height', 620);
+           //  $(parentListingView).find('.reviews').addClass('show');
+           //} else {
+           //  parentListingView.css('height', 180);
+           //  $(parentListingView).find('.reviews').removeClass('show');
+           //}
+      });
+    }
+  };
+});
+angular.module('core').directive('scheduleBtn', function () {
+  return {
+    link: function (scope, element, attrs) {
+      element.on('click', function () {
+        $(element).closest('.search-listing').find('.detailsBox').hide();
+        var parentListingView = $(element).closest('.search-listing').find('.listing-detail-container').removeClass('hide');
+        if ($(parentListingView).find('.schedule').is(':visible')) {
+          $(parentListingView).find('.schedule').hide();
+        } else {
+          $(parentListingView).find('.schedule').show();
+        }  //var parentListingView = element.parent().parent().parent().parent();
+           ////if (parentListingView.css('height') === '180px') {
+           //if (true) {
+           //  parentListingView.css('height', 700);
+           //  element.parent().parent().parent().next().next().children('.schedule').addClass('show');
+           //
+           //} else {
+           //  parentListingView.css('height', 180);
+           //  element.parent().parent().parent().next().next().children('.schedule').removeClass('show');
+           //}
+      });
+    }
+  };
+});
+angular.module('core').directive('videoBtn', function () {
+  return {
+    scope: true,
+    link: function (scope, element, attrs) {
+      element.on('click', function () {
+        $(element).closest('.search-listing').find('.detailsBox').hide();
+        var parentListingView = $(element).closest('.search-listing').find('.listing-detail-container').removeClass('hide');
+        if ($(parentListingView).find('.video').is(':visible')) {
+          $(parentListingView).find('.video').hide();
+        } else {
+          $(parentListingView).find('.video').show();
+        }  //var parentListingView = element.parent().parent().parent().parent();
+           ////if (parentListingView.css('height') === '180px') {
+           //if (true) {
+           //  element.parent().parent().parent().parent().css('height', 580);
+           //  element.parent().parent().parent().next().next().children('.video').addClass('show');
+           //} else {
+           //  element.parent().parent().parent().parent().css('height', 180);
+           //  element.parent().parent().parent().next().next().children('.video').removeClass('show');
+           //}
+      });
+    }
+  };
+});
+angular.module('core').directive('messageBtn', function () {
+  return {
+    scope: true,
+    link: function (scope, element, attrs) {
+      element.on('click', function () {
+        $(element).closest('.search-listing').find('.detailsBox').hide();
+        var parentListingView = $(element).closest('.search-listing').find('.listing-detail-container').removeClass('hide');
+        if ($(parentListingView).find('.message').is(':visible')) {
+          $(parentListingView).find('.message').hide();
+        } else {
+          $(parentListingView).find('.message').show();
+        }
+      });
+    }
+  };
+});
+angular.module('core').directive('toggle', function () {
+  return {
+    scope: true,
+    link: function (scope, element, attrs) {
+      scope.on = false;
+      scope.toggle = function () {
+        scope.on = !scope.on;
+      };
+    }
+  };
+});angular.module('core').directive('collapsPanel', function () {
+  return {
+    restrict: 'EA',
+    scope: {},
+    link: function (scope, elem, attr) {
+      $(elem).find('span.clickable').on('click', function (e) {
+        var $this = $(this);
+        if (!$this.hasClass('panel-collapsed')) {
+          $this.parents('.panel').find('.panel-body').slideUp();
+          $this.addClass('panel-collapsed');
+          $this.find('i').removeClass('glyphicon-chevron-up').addClass('glyphicon-chevron-down');
+        } else {
+          $this.parents('.panel').find('.panel-body').slideDown();
+          $this.removeClass('panel-collapsed');
+          $this.find('i').removeClass('glyphicon-chevron-down').addClass('glyphicon-chevron-up');
+        }
+      });
+    }
+  };
+});angular.module('core').directive('listingDetailButtons', function () {
+  return {
+    restrict: 'E',
+    scope: {},
+    templateUrl: 'modules/core/views/listing-detail-buttons.html'
+  };
+});/**
+ * notificationFx.js v1.0.0
+ * http://www.codrops.com
+ *
+ * Licensed under the MIT license.
+ * http://www.opensource.org/licenses/mit-license.php
+ * 
+ * Copyright 2014, Codrops
+ * http://www.codrops.com
+ */
+;
+(function (window) {
+  'use strict';
+  var docElem = window.document.documentElement, support = { animations: Modernizr.cssanimations }, animEndEventNames = {
+      'WebkitAnimation': 'webkitAnimationEnd',
+      'OAnimation': 'oAnimationEnd',
+      'msAnimation': 'MSAnimationEnd',
+      'animation': 'animationend'
+    },
+    // animation end event name
+    animEndEventName = animEndEventNames[Modernizr.prefixed('animation')];
+  /**
+	 * extend obj function
+	 */
+  function extend(a, b) {
+    for (var key in b) {
+      if (b.hasOwnProperty(key)) {
+        a[key] = b[key];
+      }
+    }
+    return a;
+  }
+  /**
+	 * NotificationFx function
+	 */
+  function NotificationFx(options) {
+    this.options = extend({}, this.options);
+    extend(this.options, options);
+    this._init();
+  }
+  /**
+	 * NotificationFx options
+	 */
+  NotificationFx.prototype.options = {
+    wrapper: document.body,
+    message: 'yo!',
+    layout: 'growl',
+    effect: 'slide',
+    type: 'error',
+    ttl: 6000,
+    onClose: function () {
+      return false;
+    },
+    onOpen: function () {
+      return false;
+    }
+  };
+  /**
+	 * init function
+	 * initialize and cache some vars
+	 */
+  NotificationFx.prototype._init = function () {
+    // create HTML structure
+    this.ntf = document.createElement('div');
+    this.ntf.className = 'ns-box ns-' + this.options.layout + ' ns-effect-' + this.options.effect + ' ns-type-' + this.options.type;
+    var strinner = '<div class="ns-box-inner">';
+    strinner += this.options.message;
+    strinner += '</div>';
+    strinner += '<span class="ns-close"></span></div>';
+    this.ntf.innerHTML = strinner;
+    // append to body or the element specified in options.wrapper
+    this.options.wrapper.insertBefore(this.ntf, this.options.wrapper.firstChild);
+    // dismiss after [options.ttl]ms
+    var self = this;
+    this.dismissttl = setTimeout(function () {
+      if (self.active) {
+        self.dismiss();
+      }
+    }, this.options.ttl);
+    // init events
+    this._initEvents();
+  };
+  /**
+	 * init events
+	 */
+  NotificationFx.prototype._initEvents = function () {
+    var self = this;
+    // dismiss notification
+    this.ntf.querySelector('.ns-close').addEventListener('click', function () {
+      self.dismiss();
+    });
+  };
+  /**
+	 * show the notification
+	 */
+  NotificationFx.prototype.show = function () {
+    this.active = true;
+    classie.remove(this.ntf, 'ns-hide');
+    classie.add(this.ntf, 'ns-show');
+    this.options.onOpen();
+  };
+  /**
+	 * dismiss the notification
+	 */
+  NotificationFx.prototype.dismiss = function () {
+    var self = this;
+    this.active = false;
+    clearTimeout(this.dismissttl);
+    classie.remove(this.ntf, 'ns-show');
+    setTimeout(function () {
+      classie.add(self.ntf, 'ns-hide');
+      // callback
+      self.options.onClose();
+    }, 25);
+    // after animation ends remove ntf from the DOM
+    var onEndAnimationFn = function (ev) {
+      if (support.animations) {
+        if (ev.target !== self.ntf)
+          return false;
+        this.removeEventListener(animEndEventName, onEndAnimationFn);
+      }
+      self.options.wrapper.removeChild(this);
+    };
+    if (support.animations) {
+      this.ntf.addEventListener(animEndEventName, onEndAnimationFn);
+    } else {
+      onEndAnimationFn();
+    }
+  };
+  /**
+	 * add to global namespace
+	 */
+  window.NotificationFx = NotificationFx;
+}(window));'use strict';
 //Menu service used for managing  menus
 angular.module('core').service('Menus', [function () {
     // Define a set of default roles
@@ -313,6 +645,28 @@ angular.module('core').service('Menus', [function () {
     //Adding the topbar menu
     this.addMenu('topbar');
   }]);'use strict';
+angular.module('core').factory('Notifications', function () {
+  var service = {};
+  service.error = function (message) {
+    var notification = new NotificationFx({
+        message: '<p>' + message + '</p>',
+        layout: 'growl',
+        effect: 'jelly',
+        type: 'notice'
+      });
+    notification.show();
+  };
+  service.success = function (message) {
+    var notification = new NotificationFx({
+        message: '<p>' + message + '</p>',
+        layout: 'growl',
+        effect: 'scale',
+        type: 'notice'
+      });
+    notification.show();
+  };
+  return service;
+});'use strict';
 // Config HTTP Error Handling
 angular.module('users').config([
   '$httpProvider',
@@ -366,6 +720,10 @@ angular.module('users').config([
     }).state('forgot', {
       url: '/password/forgot',
       templateUrl: 'modules/users/views/password/forgot-password.client.view.html'
+    }).state('myMessages', {
+      url: '/myMessages',
+      templateUrl: 'modules/users/views/settings/myMessages.client.view.html',
+      controller: 'MyMessagesController'
     }).state('reset-invlaid', {
       url: '/password/reset/invalid',
       templateUrl: 'modules/users/views/password/reset-password-invalid.client.view.html'
@@ -385,10 +743,37 @@ angular.module('users').controller('AuthenticationController', [
   'Authentication',
   function ($scope, $http, $location, Authentication) {
     $scope.authentication = Authentication;
+    $scope.languages1 = [
+      '\u05d0\u05e0\u05d2\u05dc\u05d9\u05ea',
+      '\u05e8\u05d5\u05e1\u05d9\u05ea',
+      '\u05e6\u05e8\u05e4\u05ea\u05d9\u05ea',
+      '\u05e6\u05e8\u05e4\u05ea\u05d9\u05ea'
+    ];
+    $scope.languages2 = [
+      '\u05d0\u05de\u05d4\u05e8\u05d9\u05ea',
+      '\u05d2\u05e8\u05de\u05e0\u05d9\u05ea',
+      '\u05d0\u05d9\u05d3\u05d9\u05e9',
+      '\u05e2\u05e8\u05d1\u05d9\u05ea'
+    ];
     // If user is signed in then redirect back home
-    if ($scope.authentication.user)
-      $location.path('/');
+    //if ($scope.authentication.user) $location.path('/');
+    $scope.genders = [
+      {
+        Id: 1,
+        Descr: '\u05e0\u05e7\u05d1\u05d4'
+      },
+      {
+        Id: 2,
+        Descr: '\u05d6\u05db\u05e8'
+      }
+    ];
+    $scope.credentials = {
+      languages: [],
+      s3OptionsUri: '/s3upload',
+      image: null
+    };
     $scope.signup = function () {
+      $scope.credentials.username = $scope.credentials.email;
       $http.post('/auth/signup', $scope.credentials).success(function (response) {
         // If successful we assign the response to the global user model
         $scope.authentication.user = response;
@@ -404,6 +789,40 @@ angular.module('users').controller('AuthenticationController', [
         $scope.authentication.user = response;
         // And redirect to the index page
         $location.path('/');
+      }).error(function (response) {
+        $scope.error = response.message;
+      });
+    };
+    $scope.toggleLangSelection = function (lang) {
+      var idx = $scope.credentials.languages.indexOf(lang);
+      // is currently selected
+      if (idx > -1) {
+        $scope.credentials.languages.splice(idx, 1);
+      }  // is newly selected
+      else {
+        $scope.credentials.languages.push(lang);
+      }
+    };
+  }
+]);'use strict';
+angular.module('users').controller('MyMessagesController', [
+  '$scope',
+  '$http',
+  '$location',
+  'Users',
+  'Authentication',
+  function ($scope, $http, $location, Users, Authentication) {
+    $scope.user = Authentication.user;
+    $scope.getDate = function (date) {
+      return moment(date).format('DD-MM-YYYY');
+    };
+    $scope.getTime = function (date) {
+      return moment(date).format('HH:mm');
+    };
+    $scope.init = function () {
+      $http.get('/usermessages').success(function (response) {
+        // If successful we assign the response to the global user model
+        $scope.messages = response;  // And redirect to the index page
       }).error(function (response) {
         $scope.error = response.message;
       });
@@ -458,9 +877,34 @@ angular.module('users').controller('SettingsController', [
   'Authentication',
   function ($scope, $http, $location, Users, Authentication) {
     $scope.user = Authentication.user;
+    $scope.user.s3OptionsUri = '/s3upload';
     // If user is not signed in then redirect back home
     if (!$scope.user)
       $location.path('/');
+    $scope.languages1 = [
+      '\u05d0\u05e0\u05d2\u05dc\u05d9\u05ea',
+      '\u05e8\u05d5\u05e1\u05d9\u05ea',
+      '\u05e6\u05e8\u05e4\u05ea\u05d9\u05ea',
+      '\u05e1\u05e4\u05e8\u05d3\u05d9\u05ea'
+    ];
+    $scope.languages2 = [
+      '\u05d0\u05de\u05d4\u05e8\u05d9\u05ea',
+      '\u05d2\u05e8\u05de\u05e0\u05d9\u05ea',
+      '\u05d0\u05d9\u05d3\u05d9\u05e9',
+      '\u05e2\u05e8\u05d1\u05d9\u05ea'
+    ];
+    // If user is signed in then redirect back home
+    //if ($scope.authentication.user) $location.path('/');
+    $scope.genders = [
+      {
+        Id: 1,
+        Descr: '\u05e0\u05e7\u05d1\u05d4'
+      },
+      {
+        Id: 2,
+        Descr: '\u05d6\u05db\u05e8'
+      }
+    ];
     // Check if there are additional accounts 
     $scope.hasConnectedAdditionalSocialAccounts = function (provider) {
       for (var i in $scope.user.additionalProvidersData) {
@@ -508,6 +952,16 @@ angular.module('users').controller('SettingsController', [
       }).error(function (response) {
         $scope.error = response.message;
       });
+    };
+    $scope.toggleLangSelection = function (lang) {
+      var idx = $scope.user.languages.indexOf(lang);
+      // is currently selected
+      if (idx > -1) {
+        $scope.user.languages.splice(idx, 1);
+      }  // is newly selected
+      else {
+        $scope.user.languages.push(lang);
+      }
     };
   }
 ]);'use strict';

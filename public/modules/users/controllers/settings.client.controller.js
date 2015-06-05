@@ -3,9 +3,15 @@
 angular.module('users').controller('SettingsController', ['$scope', '$http', '$location', 'Users', 'Authentication',
 	function($scope, $http, $location, Users, Authentication) {
 		$scope.user = Authentication.user;
-
+		$scope.user.s3OptionsUri= '/s3upload';
 		// If user is not signed in then redirect back home
 		if (!$scope.user) $location.path('/');
+		$scope.languages1 = ['אנגלית', 'רוסית', 'צרפתית', 'ספרדית'];
+		$scope.languages2 = ['אמהרית', 'גרמנית', 'אידיש', 'ערבית'];
+
+		// If user is signed in then redirect back home
+		//if ($scope.authentication.user) $location.path('/');
+		$scope.genders = [{Id: 1, Descr: 'נקבה'}, {Id: 2, Descr: 'זכר'}];
 
 		// Check if there are additional accounts 
 		$scope.hasConnectedAdditionalSocialAccounts = function(provider) {
@@ -66,6 +72,20 @@ angular.module('users').controller('SettingsController', ['$scope', '$http', '$l
 			}).error(function(response) {
 				$scope.error = response.message;
 			});
+		};
+
+		$scope.toggleLangSelection = function (lang) {
+			var idx = $scope.user.languages.indexOf(lang);
+
+			// is currently selected
+			if (idx > -1) {
+				$scope.user.languages.splice(idx, 1);
+			}
+
+			// is newly selected
+			else {
+				$scope.user.languages.push(lang);
+			}
 		};
 	}
 ]);
